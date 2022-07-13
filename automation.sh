@@ -38,4 +38,23 @@ then
 aws s3 cp /tmp/${name}-httpd-accesslogs-${timestamp}.tar s3://${s3_bucket}/${name}-httpd-accesslogs-${timestamp}.tar
 aws s3 cp /tmp/${name}-httpd-accesslogs-${timestamp}.tar s3://${s3_bucket}/${name}-httpd-errorlogs-${timestamp}.tar
 fi
+#for task3
+file_path="/var/www/html"
+#Search inventory file is present or not if not then create inventory.html with specified columns
+if [ ! -f ${file_path}/inventory.html ];
+then
+    echo -e 'LogType\t\tTimeCreated\t\tType\t\tSize' >> ${file_path}/inventory.html
+fi
+#if inventory file is present then add the require data under columns
+if [ -f ${file_path}/inventory.html ]
+then
+    tar_size=$(du -h /tmp/* | tail -1 | awk '{print $1}')
+    echo -e "httpd-log\t\t${timestamp}\t\ttar\t\t${tar_size}" >> ${file_path}/inventory.html
+fi
+#Search if automation file is in cron.d
+if [ ! -f /etc/crond.d/automation ];
+then
+    #apply cron to automation.sh file
+    echo "* * * * * root /root/Automation_Project/automation.sh" >> /etc/cron.d/automation
+fi
 
